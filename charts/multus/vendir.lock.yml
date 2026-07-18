@@ -2,14 +2,6 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - git:
-      commitTitle: 'Merge pull request #1428 from xing-yang/changelog-8.6.0...'
-      sha: 78e32cd84e0abec2621924a30e38c755f93e180a
-      tags:
-      - v8.6.0
-    path: .
-  path: charts/snapshot-controller/crds
-- contents:
-  - git:
       commitTitle: 'Merge pull request #1510 from hrntknr/limit_listener...'
       sha: db30741512795c258b3ba383a571a66850e8baac
       tags:

@@ -6,5 +6,5 @@ charts/*/README.md
 charts/*/values.schema.json
 # Vendored from upstream by `mise run crds`
 charts/*/crds/
-vendir.lock.yml
+charts/*/vendir.lock.yml
 .vendor/

@@ -1,0 +1,17 @@
+---
+# Upstream CRD source, synced by `mise run crds`. The ref must match the chart
+# appVersion (enforced by that task).
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+  # Staging: upstream ships no standalone CRD file; the crds task extracts the
+  # NAD CRD from this manifest into crds/.
+  - path: .vendor/multus-cni
+    contents:
+      - path: .
+        git:
+          url: https://github.com/k8snetworkplumbingwg/multus-cni
+          ref: v4.3.0
+        includePaths:
+          - deployments/multus-daemonset.yml
+        newRootPath: deployments

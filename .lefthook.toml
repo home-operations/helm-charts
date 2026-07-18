@@ -7,10 +7,10 @@ configs = ["lefthook.common.toml"]
 # it. CI's crds-check is the backstop.
 [pre-commit.commands.crds]
 glob = [
-  "vendir.yml",
+  "charts/*/vendir.yml",
   "charts/*/Chart.yaml",
 ]
-run = "mise run crds && git add vendir.lock.yml"
+run = "mise run crds && git add charts/*/vendir.lock.yml"
 
 # Regenerate the charts' committed README + values.schema.json whenever their inputs
 # change, and stage them. CI's helm-docs-check is the backstop.

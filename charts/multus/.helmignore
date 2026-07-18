@@ -1,0 +1,4 @@
+# Vendoring machinery; not part of the packaged chart
+vendir.yml
+vendir.lock.yml
+.vendor/

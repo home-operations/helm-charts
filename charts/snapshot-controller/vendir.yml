@@ -1,0 +1,20 @@
+---
+# Upstream CRD source, synced by `mise run crds`. The ref must match the chart
+# appVersion (enforced by that task).
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+  # Ship byte-for-byte from upstream; an injected conversion stanza is what
+  # broke piraeusdatastore/helm-charts#98.
+  - path: crds
+    contents:
+      - path: .
+        git:
+          url: https://github.com/kubernetes-csi/external-snapshotter
+          ref: v8.6.0
+        includePaths:
+          - client/config/crd/*.yaml
+        excludePaths:
+          # Not a CRD; Helm would try to install everything in crds/.
+          - client/config/crd/kustomization.yaml
+        newRootPath: client/config/crd

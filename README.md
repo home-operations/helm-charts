@@ -64,11 +64,12 @@ per chart through release-please tags.
 
 Charts ship their CRDs through Helm's native `crds/` directory. The CRD files are
 not committed: `mise run crds` pulls them with [vendir](https://carvel.dev/vendir/)
-from the upstream refs pinned in `vendir.yml` (which must match the owning chart's
-appVersion; the task enforces this), and CI re-pulls them for every test run and
-at release packaging, so a published chart always carries the CRDs matching its
-appVersion. The committed `vendir.lock.yml` pins the exact upstream commits, and
-Renovate bumps each chart's appVersion and vendir ref together in one grouped PR.
+from the upstream ref pinned in each chart's `vendir.yml` (which must match that
+chart's appVersion; the task enforces this), and CI re-pulls them for every test
+run and at release packaging, so a published chart always carries the CRDs
+matching its appVersion. Each chart's committed `vendir.lock.yml` pins the exact
+upstream commit, and Renovate bumps a chart's appVersion and vendir ref together
+in one grouped PR.
 
 ## Releases and versioning
 

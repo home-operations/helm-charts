@@ -15,21 +15,16 @@ zizmor = "1.27.0"
 [tasks.crds]
 description = "Sync the vendored upstream CRDs (vendir) and re-derive per-chart CRD files"
 run = """
-vendir sync
-
-# Each chart's vendir ref must match its appVersion (the image tag).
-for pair in \
-  "charts/snapshot-controller/crds charts/snapshot-controller" \
-  ".vendor/multus-cni charts/multus"
-do
-  dir="${pair% *}"
-  chart="${pair#* }"
-  ref="$(dir="${dir}" yq '.directories[] | select(.path == strenv(dir)) | .contents[0].git.ref' vendir.yml)"
-  app_version="$(yq '.appVersion' "${chart}/Chart.yaml")"
+for dir in charts/*/; do
+  [ -f "${dir}vendir.yml" ] || continue
+  # Each chart's vendir ref must match its appVersion (the image tag).
+  ref="$(yq '.directories[0].contents[0].git.ref' "${dir}vendir.yml")"
+  app_version="$(yq '.appVersion' "${dir}Chart.yaml")"
   if [ "${ref}" != "${app_version}" ]; then
-    echo "${chart}: vendir ref ${ref} does not match appVersion ${app_version}" >&2
+    echo "${dir}: vendir ref ${ref} does not match appVersion ${app_version}" >&2
     exit 1
   fi
+  (cd "${dir}" && vendir sync)
 done
 
 # A conversion stanza is what broke piraeusdatastore/helm-charts#98.
@@ -41,7 +36,7 @@ for crd in charts/snapshot-controller/crds/*.yaml; do
 done
 
 # multus ships no standalone CRD file; extract it from the staged manifest.
-yq 'select(.kind == "CustomResourceDefinition")' .vendor/multus-cni/multus-daemonset.yml \
+yq 'select(.kind == "CustomResourceDefinition")' charts/multus/.vendor/multus-cni/multus-daemonset.yml \
   > charts/multus/crds/k8s.cni.cncf.io_network-attachment-definitions.yaml
 
 # vendir wipes its managed directory on sync; restore the tracked placeholder.
@@ -49,10 +44,10 @@ touch charts/snapshot-controller/crds/.gitkeep
 """
 
 [tasks.crds-check]
-description = "Fail if the committed vendir lock is stale (CI gate)"
+description = "Fail if a committed vendir lock is stale (CI gate)"
 run = """
 mise run crds
-git diff --exit-code vendir.lock.yml
+git diff --exit-code charts/*/vendir.lock.yml
 """
 
 [tasks.e2e]
