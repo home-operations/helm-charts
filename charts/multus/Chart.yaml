@@ -2,14 +2,14 @@
 apiVersion: v2
 name: multus
 description: >-
-  Deploys the Multus CNI meta-plugin together with the NetworkAttachmentDefinition
-  CRD, allowing pods to attach to additional networks. Includes an optional init
-  container that installs the reference CNI plugins on distributions that do not
-  ship them (e.g. Talos Linux).
+  Deploys the Multus CNI meta-plugin together with the
+  NetworkAttachmentDefinition CRD, allowing pods to attach to additional
+  networks. Includes an optional init container that installs the reference CNI
+  plugins on distributions that do not ship them (e.g. Talos Linux).
 type: application
 kubeVersion: ">=1.25.0-0"
 # Managed by release-please.
-version: 0.0.0
+version: 0.1.0
 # Upstream release: default image tag; must match the vendir ref (`mise run crds`).
 # renovate: image=ghcr.io/k8snetworkplumbingwg/multus-cni
 appVersion: "v4.3.0"

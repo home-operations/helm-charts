@@ -10,7 +10,7 @@ type: application
 # Floor: snapshot.storage.k8s.io/v1 CRDs + restricted Pod Security (seccompProfile).
 kubeVersion: ">=1.25.0-0"
 # Managed by release-please.
-version: 0.0.0
+version: 0.1.0
 # Upstream release: default image tag; must match the vendir ref (`mise run crds`).
 # renovate: image=registry.k8s.io/sig-storage/snapshot-controller
 appVersion: "v8.6.0"
