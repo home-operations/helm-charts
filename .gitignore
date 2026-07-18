@@ -1,0 +1,18 @@
+# Packaged charts
+*.tgz
+
+# vendir staging area
+.vendor/
+
+# CRDs are pulled by `mise run crds`, never committed; vendir.lock.yml pins them
+charts/*/crds/*
+!charts/*/crds/.gitkeep
+
+# editor and IDE paraphernalia
+*.swo
+*.swp
+*~
+.claude
+.idea
+.private
+.vscode

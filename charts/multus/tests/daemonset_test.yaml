@@ -1,0 +1,97 @@
+suite: daemonset
+templates:
+  - daemonset.tpl
+tests:
+  - it: should render a DaemonSet with the appVersion image by default
+    asserts:
+      - isKind:
+          of: DaemonSet
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/k8snetworkplumbingwg/multus-cni:v4.3.0
+      - equal:
+          path: spec.template.spec.hostNetwork
+          value: true
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: system-node-critical
+
+  - it: should install the CNI plugins init container by default
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: cni-plugins
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: ghcr.io/home-operations/cni-plugins:1.9.1
+      - equal:
+          path: spec.template.spec.initContainers[0].volumeMounts[0].mountPath
+          value: /host/opt/cni/bin
+
+  - it: should drop the init container when cniPlugins is disabled
+    set:
+      cniPlugins.enabled: false
+    asserts:
+      - notExists:
+          path: spec.template.spec.initContainers
+
+  - it: should pass the default args and append extraArgs
+    set:
+      extraArgs:
+        - --namespace-isolation=true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value:
+            - --cleanup-config-on-exit
+            - --multus-cni-conf-dir=/tmp
+            - --namespace-isolation=true
+
+  - it: should mount the host CNI directories from the cni values
+    set:
+      cni.netDir: /var/lib/rancher/k3s/agent/etc/cni/net.d
+      cni.binDir: /var/lib/rancher/k3s/data/cni
+    asserts:
+      - equal:
+          path: spec.template.spec.volumes[0].hostPath.path
+          value: /var/lib/rancher/k3s/agent/etc/cni/net.d
+      - equal:
+          path: spec.template.spec.volumes[1].hostPath.path
+          value: /var/lib/rancher/k3s/data/cni
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /host/etc/cni/net.d
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[1].mountPath
+          value: /host/opt/cni/bin
+
+  - it: should keep NET_ADMIN and a read-only root filesystem
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].securityContext.capabilities.add
+          content: NET_ADMIN
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+
+  - it: should tolerate CriticalAddonsOnly by default
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: CriticalAddonsOnly
+            operator: Exists
+
+  - it: should add pod annotations and labels
+    set:
+      podAnnotations:
+        foo: bar
+      podLabels:
+        baz: qux
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations.foo
+          value: bar
+      - equal:
+          path: spec.template.metadata.labels.baz
+          value: qux

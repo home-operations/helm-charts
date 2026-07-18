@@ -1,0 +1,17 @@
+snapshot-controller {{ .Values.image.tag | default .Chart.AppVersion }} is installed in namespace {{ .Release.Namespace }}.
+
+The snapshot.storage.k8s.io and groupsnapshot.storage.k8s.io CRDs ship in the
+chart's crds/ directory exactly as upstream publishes them (no conversion
+webhook). Helm installs them on first install but never upgrades or deletes
+them; after upgrading the chart across an appVersion bump, apply the matching
+CRDs (see the chart README).
+
+Check the rollout:
+
+  kubectl -n {{ .Release.Namespace }} rollout status deployment/{{ include "snapshot-controller.fullname" . }}
+
+{{- if not .Values.volumeSnapshotClasses }}
+
+No VolumeSnapshotClass is defined. Snapshots need one that matches your CSI
+driver; create it via the volumeSnapshotClasses value (see the chart README).
+{{- end }}

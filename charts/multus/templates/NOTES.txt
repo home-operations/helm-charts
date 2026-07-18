@@ -1,0 +1,18 @@
+multus {{ .Values.image.tag | default .Chart.AppVersion }} is installed as a DaemonSet in namespace {{ .Release.Namespace }}.
+
+The NetworkAttachmentDefinition CRD ships in the chart's crds/ directory. Helm
+installs it on first install but never upgrades or deletes it; after upgrading
+the chart across an appVersion bump, apply the matching CRD (see the chart
+README).
+
+Check the rollout:
+
+  kubectl -n {{ .Release.Namespace }} rollout status daemonset/{{ include "multus.fullname" . }}
+
+Attach a pod to an additional network by creating a NetworkAttachmentDefinition
+and annotating the pod with k8s.v1.cni.cncf.io/networks.
+{{- if not .Values.cniPlugins.enabled }}
+
+cniPlugins.enabled is false: make sure the host provides the CNI plugin
+binaries in {{ .Values.cni.binDir }}.
+{{- end }}

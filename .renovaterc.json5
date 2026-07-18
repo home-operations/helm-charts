@@ -1,0 +1,28 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "local>home-operations/renovate-config",
+    // Bumps Chart.yaml appVersion from the upstream image tag via the
+    // `# renovate: image=...` annotation above it.
+    "customManagers:helmChartYamlAppVersions",
+  ],
+  packageRules: [
+    // Each chart's appVersion (docker tag) and its vendir git ref track the same
+    // upstream; group them so they bump in one PR (the crds task enforces they
+    // match).
+    {
+      groupName: "external-snapshotter",
+      matchPackageNames: [
+        "registry.k8s.io/sig-storage/snapshot-controller",
+        "https://github.com/kubernetes-csi/external-snapshotter",
+      ],
+    },
+    {
+      groupName: "multus-cni",
+      matchPackageNames: [
+        "ghcr.io/k8snetworkplumbingwg/multus-cni",
+        "https://github.com/k8snetworkplumbingwg/multus-cni",
+      ],
+    },
+  ],
+}

@@ -1,0 +1,105 @@
+suite: deployment
+templates:
+  - deployment.tpl
+tests:
+  - it: should render a Deployment with the appVersion image by default
+    asserts:
+      - isKind:
+          of: Deployment
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: registry.k8s.io/sig-storage/snapshot-controller:v8.6.0
+      - equal:
+          path: spec.replicas
+          value: 1
+
+  - it: should respect image tag and repository overrides
+    set:
+      image.repository: example.com/snapshot-controller
+      image.tag: v9.0.0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: example.com/snapshot-controller:v9.0.0
+
+  - it: should enable leader election and the group snapshot feature gate by default
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --leader-election=true
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --leader-election-namespace=$(NAMESPACE)
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --feature-gates=CSIVolumeGroupSnapshot=true
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --http-endpoint=:8080
+
+  - it: should drop leader election args when disabled
+    set:
+      controller.leaderElection.enabled: false
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --leader-election=false
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --leader-election-namespace=$(NAMESPACE)
+
+  - it: should drop the feature gate when group snapshots are disabled
+    set:
+      controller.volumeGroupSnapshots: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --feature-gates=CSIVolumeGroupSnapshot=true
+
+  - it: should append extraArgs
+    set:
+      controller.extraArgs:
+        - --retry-crd-interval-max=1m
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --retry-crd-interval-max=1m
+
+  - it: should run with the restricted security defaults
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.securityContext.seccompProfile.type
+          value: RuntimeDefault
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+
+  - it: should set the priority class by default and allow clearing it
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: system-cluster-critical
+
+  - it: should omit priorityClassName when set empty
+    set:
+      priorityClassName: ""
+    asserts:
+      - notExists:
+          path: spec.template.spec.priorityClassName
+
+  - it: should add pod annotations and labels
+    set:
+      podAnnotations:
+        foo: bar
+      podLabels:
+        baz: qux
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations.foo
+          value: bar
+      - equal:
+          path: spec.template.metadata.labels.baz
+          value: qux

@@ -1,0 +1,53 @@
+suite: snapshot classes
+templates:
+  - volumesnapshotclasses.tpl
+  - volumegroupsnapshotclasses.tpl
+tests:
+  - it: should render nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render a VolumeSnapshotClass with defaults
+    template: volumesnapshotclasses.tpl
+    set:
+      volumeSnapshotClasses:
+        - name: csi-snapclass
+          driver: csi.example.com
+          annotations:
+            snapshot.storage.kubernetes.io/is-default-class: "true"
+          parameters:
+            key: value
+    asserts:
+      - isKind:
+          of: VolumeSnapshotClass
+      - isAPIVersion:
+          of: snapshot.storage.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: csi-snapclass
+      - equal:
+          path: driver
+          value: csi.example.com
+      - equal:
+          path: deletionPolicy
+          value: Delete
+      - equal:
+          path: parameters.key
+          value: value
+
+  - it: should render a VolumeGroupSnapshotClass honoring deletionPolicy
+    template: volumegroupsnapshotclasses.tpl
+    set:
+      volumeGroupSnapshotClasses:
+        - name: csi-groupsnapclass
+          driver: csi.example.com
+          deletionPolicy: Retain
+    asserts:
+      - isKind:
+          of: VolumeGroupSnapshotClass
+      - isAPIVersion:
+          of: groupsnapshot.storage.k8s.io/v1
+      - equal:
+          path: deletionPolicy
+          value: Retain

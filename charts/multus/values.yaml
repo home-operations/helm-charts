@@ -1,0 +1,107 @@
+---
+# Default values for multus; the Multus CNI meta-plugin.
+# The NetworkAttachmentDefinition CRD ships unmodified from upstream in the
+# chart's crds/ directory (see the README).
+
+image:
+  # -- Multus image repository.
+  repository: ghcr.io/k8snetworkplumbingwg/multus-cni
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag; defaults to the chart appVersion.
+  tag: ""
+
+cniPlugins:
+  # -- Install the reference CNI plugins into `cni.binDir` via an init container.
+  # Needed on distributions that do not ship them (e.g. Talos Linux); disable when
+  # the host already provides them.
+  enabled: true
+  image:
+    # -- CNI plugins image repository (copies the plugin binaries to the host).
+    repository: ghcr.io/home-operations/cni-plugins
+    # -- Image pull policy.
+    pullPolicy: IfNotPresent
+    # -- CNI plugins image tag.
+    tag: 1.9.1
+  # -- Init container resource requests/limits.
+  resources: {}
+
+cni:
+  # -- Host directory with the CNI network configurations.
+  netDir: /etc/cni/net.d
+  # -- Host directory with the CNI plugin binaries.
+  binDir: /opt/cni/bin
+
+# -- Additional arguments passed to the multus entrypoint (the defaults
+# `--cleanup-config-on-exit` and `--multus-cni-conf-dir=/tmp` are always set).
+extraArgs: []
+
+# -- Image pull secrets for private registries.
+imagePullSecrets: []
+# - name: my-registry-secret
+
+# -- Override the chart name used in resource names.
+nameOverride: ""
+# -- Override the full release name.
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Create a ServiceAccount.
+  create: true
+  # -- Automount the API token (on by default: the entrypoint generates a
+  # kubeconfig from it for the CNI plugin).
+  automount: true
+  # -- Annotations for the ServiceAccount.
+  annotations: {}
+  # -- ServiceAccount name; generated from the release name if empty.
+  name: ""
+
+rbac:
+  # -- Create the ClusterRole/ClusterRoleBinding the CNI plugin needs to read pod
+  # network annotations and report status.
+  create: true
+  # -- Annotations for the RBAC resources.
+  annotations: {}
+
+# -- Annotations added to the pod.
+podAnnotations: {}
+# -- Labels added to the pod.
+podLabels: {}
+
+# -- Pod-level securityContext (the entrypoint writes to host paths and must run as root).
+podSecurityContext: {}
+
+# -- Container securityContext (no privilege escalation, read-only root filesystem, NET_ADMIN only).
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    add:
+      - NET_ADMIN
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+# -- Pod resource requests/limits.
+resources: {}
+# limits:
+#   cpu: 100m
+#   memory: 128Mi
+# requests:
+#   cpu: 10m
+#   memory: 32Mi
+
+# -- Priority class name for pod scheduling (node infrastructure: must not be
+# evicted from any node).
+priorityClassName: system-node-critical
+
+# -- Node selector for pod scheduling.
+nodeSelector: {}
+
+# -- Tolerations for pod scheduling (defaults keep the DaemonSet on
+# critical-addons-only nodes).
+tolerations:
+  - key: CriticalAddonsOnly
+    operator: Exists
+
+# -- Affinity rules for pod scheduling.
+affinity: {}

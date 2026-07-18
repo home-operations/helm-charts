@@ -1,0 +1,31 @@
+---
+# Upstream CRD sources, synced by `mise run crds`. Each ref must match the
+# owning chart's appVersion (enforced by that task).
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+  # Ship byte-for-byte from upstream; an injected conversion stanza is what
+  # broke piraeusdatastore/helm-charts#98.
+  - path: charts/snapshot-controller/crds
+    contents:
+      - path: .
+        git:
+          url: https://github.com/kubernetes-csi/external-snapshotter
+          ref: v8.6.0
+        includePaths:
+          - client/config/crd/*.yaml
+        excludePaths:
+          # Not a CRD; Helm would try to install everything in crds/.
+          - client/config/crd/kustomization.yaml
+        newRootPath: client/config/crd
+  # Staging: upstream ships no standalone CRD file; the crds task extracts the
+  # NAD CRD from this manifest into charts/multus/crds/.
+  - path: .vendor/multus-cni
+    contents:
+      - path: .
+        git:
+          url: https://github.com/k8snetworkplumbingwg/multus-cni
+          ref: v4.3.0
+        includePaths:
+          - deployments/multus-daemonset.yml
+        newRootPath: deployments

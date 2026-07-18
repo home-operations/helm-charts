@@ -1,0 +1,151 @@
+[tools]
+cosign = "3.1.1"
+helm = "4.2.3"
+helm-docs = "1.14.2"
+jq = "1.8.2"
+kind = "0.32.0"
+kubectl = "1.36.2"
+lefthook = "2.1.10"
+oxfmt = "0.58.0"
+vendir = "0.46.0"
+yq = "4.53.3"
+zizmor = "1.26.1"
+"aqua:dadav/helm-schema" = "0.23.4"
+
+[tasks.crds]
+description = "Sync the vendored upstream CRDs (vendir) and re-derive per-chart CRD files"
+run = """
+vendir sync
+
+# Each chart's vendir ref must match its appVersion (the image tag).
+for pair in \
+  "charts/snapshot-controller/crds charts/snapshot-controller" \
+  ".vendor/multus-cni charts/multus"
+do
+  dir="${pair% *}"
+  chart="${pair#* }"
+  ref="$(dir="${dir}" yq '.directories[] | select(.path == strenv(dir)) | .contents[0].git.ref' vendir.yml)"
+  app_version="$(yq '.appVersion' "${chart}/Chart.yaml")"
+  if [ "${ref}" != "${app_version}" ]; then
+    echo "${chart}: vendir ref ${ref} does not match appVersion ${app_version}" >&2
+    exit 1
+  fi
+done
+
+# A conversion stanza is what broke piraeusdatastore/helm-charts#98.
+for crd in charts/snapshot-controller/crds/*.yaml; do
+  if yq -e '.spec.conversion' "${crd}" >/dev/null 2>&1; then
+    echo "${crd}: upstream now ships a conversion stanza; review the chart before releasing" >&2
+    exit 1
+  fi
+done
+
+# multus ships no standalone CRD file; extract it from the staged manifest.
+yq 'select(.kind == "CustomResourceDefinition")' .vendor/multus-cni/multus-daemonset.yml \
+  > charts/multus/crds/k8s.cni.cncf.io_network-attachment-definitions.yaml
+
+# vendir wipes its managed directory on sync; restore the tracked placeholder.
+touch charts/snapshot-controller/crds/.gitkeep
+"""
+
+[tasks.crds-check]
+description = "Fail if the committed vendir lock is stale (CI gate)"
+run = """
+mise run crds
+git diff --exit-code vendir.lock.yml
+"""
+
+[tasks.e2e]
+description = "Install charts on a throwaway kind cluster and verify runtime behavior (all charts, or only those in $CHARTS)"
+depends = ["crds"]
+run = '''
+cluster="${KIND_CLUSTER:-helm-charts-e2e}"
+if ! kind get clusters | grep -qx "${cluster}"; then
+  # localStorageCapacityIsolation off: kubelet rootfs detection fails when
+  # container storage sits on ZFS (e.g. TrueNAS dev machines).
+  kind create cluster --name "${cluster}" --config - <<EOF
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+kubeadmConfigPatches:
+  - |
+    kind: KubeletConfiguration
+    localStorageCapacityIsolation: false
+EOF
+fi
+trap 'kind delete cluster --name "${cluster}"' EXIT
+kubectl config use-context "kind-${cluster}"
+
+# One retry: etcd on a loaded host can time out mid-purge.
+uninstall() {
+  helm --namespace kube-system uninstall "$1" --ignore-not-found ||
+    helm --namespace kube-system uninstall "$1" --ignore-not-found
+}
+
+for dir in ${CHARTS:-charts/*}; do
+  chart="$(basename "${dir}")"
+  case "${chart}" in
+    snapshot-controller)
+      helm install snapshot-controller charts/snapshot-controller \
+        --namespace kube-system \
+        --set 'volumeSnapshotClasses[0].name=e2e' \
+        --set 'volumeSnapshotClasses[0].driver=example.com' \
+        --set 'volumeGroupSnapshotClasses[0].name=e2e' \
+        --set 'volumeGroupSnapshotClasses[0].driver=example.com' \
+        --wait --timeout 5m
+      kubectl get volumesnapshotclass e2e
+      kubectl get volumegroupsnapshotclass e2e
+      # Uninstall must leave the CRDs behind (native crds/ handling).
+      uninstall snapshot-controller
+      kubectl get crd volumesnapshots.snapshot.storage.k8s.io
+      ;;
+    multus)
+      helm install multus charts/multus --namespace kube-system --wait --timeout 5m
+      kubectl apply -f - <<EOF
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: e2e
+spec:
+  config: '{"cniVersion": "0.3.1", "type": "macvlan", "master": "eth0", "mode": "bridge", "ipam": {}}'
+EOF
+      kubectl get network-attachment-definitions e2e
+      # Uninstall must leave the CRD and user objects behind (native crds/ handling).
+      uninstall multus
+      kubectl get crd network-attachment-definitions.k8s.cni.cncf.io
+      kubectl get network-attachment-definitions e2e
+      ;;
+    *)
+      echo "${chart}: no e2e scenario defined" >&2
+      exit 1
+      ;;
+  esac
+done
+'''
+
+[tasks.helm-lint]
+description = "Run helm lint (all charts, or only those in $CHARTS)"
+run = "helm lint ${CHARTS:-charts/*}"
+
+[tasks.helm-test]
+description = "Run helm unit tests (all charts, or only those in $CHARTS)"
+run = "helm unittest ${CHARTS:-charts/*}"
+
+[tasks.helm-docs]
+description = "Generate each chart's README + values.schema.json from Chart.yaml + values.yaml"
+run = """
+helm-docs --chart-search-root=charts --log-level=warn
+# required/additionalProperties are skipped so the schema stays permissive: values.yaml
+# supplies every default and the free-form maps stay open. --append-newline gives a
+# clean EOF; the file is .prettierignore'd (a generated artifact), so oxfmt skips it.
+helm-schema --chart-search-root charts --skip-auto-generation required,additionalProperties --append-newline
+"""
+
+[tasks.helm-docs-check]
+description = "Fail if the generated chart README/schema are stale (CI gate)"
+run = """
+mise run helm-docs
+git diff --exit-code charts/*/README.md charts/*/values.schema.json
+"""
+
+[hooks]
+postinstall = "lefthook install"

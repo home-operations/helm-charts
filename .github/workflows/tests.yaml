@@ -1,0 +1,112 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # renovate: datasource=github-releases depName=helm-unittest/helm-unittest
+  HELM_UNITTEST_VERSION: "v1.1.1"
+
+jobs:
+  changed:
+    name: Detect Changed Charts
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      charts: ${{ steps.charts.outputs.charts }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Get changed charts
+        id: changed
+        uses: bjw-s-labs/action-changed-files@a9a36fb08ce06db9b02fbd8026cc2c0945eb9841 # v0.6.0
+        with:
+          path: charts
+          include_only_directories: true
+          max_depth: 1
+
+      - name: Determine charts to process
+        id: charts
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          CHANGED: ${{ steps.changed.outputs.changed_files }}
+        run: |
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            charts="$(printf '%s\n' charts/* | jq --raw-input . | jq --compact-output --slurp .)"
+          else
+            charts="${CHANGED}"
+          fi
+          echo "charts=${charts}" >> "$GITHUB_OUTPUT"
+
+  helm-test:
+    name: Helm Unit Tests (${{ matrix.chart }})
+    needs: changed
+    if: ${{ needs.changed.outputs.charts != '[]' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: ${{ fromJSON(needs.changed.outputs.charts) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+        with:
+          experimental: true
+          install_args: --locked
+
+      - name: Run helm unit tests
+        env:
+          CHARTS: ${{ matrix.chart }}
+        run: |
+          helm plugin install https://github.com/helm-unittest/helm-unittest --version "${HELM_UNITTEST_VERSION}" --verify=false
+          mise run helm-test
+
+  # Repo-wide gates: generated docs and the vendir lock must always be current.
+  checks:
+    name: Repo Checks
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Mise
+        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+        with:
+          experimental: true
+          install_args: --locked
+
+      - name: Check chart docs are current
+        run: mise run helm-docs-check
+
+      - name: Check vendir lock is current
+        run: mise run crds-check

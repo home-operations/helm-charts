@@ -1,0 +1,38 @@
+suite: servicemonitor
+templates:
+  - servicemonitor.tpl
+tests:
+  - it: should not render by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render when enabled
+    set:
+      monitoring.serviceMonitor.enabled: true
+    asserts:
+      - isKind:
+          of: ServiceMonitor
+      - equal:
+          path: spec.endpoints[0].port
+          value: metrics
+      - equal:
+          path: spec.endpoints[0].path
+          value: /metrics
+
+  - it: should add labels and relabelings
+    set:
+      monitoring.serviceMonitor.enabled: true
+      monitoring.serviceMonitor.labels:
+        release: prometheus
+      monitoring.serviceMonitor.metricRelabelings:
+        - action: drop
+          sourceLabels: [__name__]
+          regex: workqueue_.+
+    asserts:
+      - equal:
+          path: metadata.labels.release
+          value: prometheus
+      - equal:
+          path: spec.endpoints[0].metricRelabelings[0].action
+          value: drop

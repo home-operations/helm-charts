@@ -1,0 +1,31 @@
+[[remotes]]
+git_url = "https://github.com/home-operations/.github"
+ref = "main"
+configs = ["lefthook.common.toml"]
+
+# Re-sync the vendir lock (and local CRDs) whenever its inputs change, and stage
+# it. CI's crds-check is the backstop.
+[pre-commit.commands.crds]
+glob = [
+  "vendir.yml",
+  "charts/*/Chart.yaml",
+]
+run = "mise run crds && git add vendir.lock.yml"
+
+# Regenerate the charts' committed README + values.schema.json whenever their inputs
+# change, and stage them. CI's helm-docs-check is the backstop.
+[pre-commit.commands.helm-docs]
+glob = [
+  "charts/*/Chart.yaml",
+  "charts/*/values.yaml",
+  "charts/*/README.md.gotmpl",
+]
+run = "mise run helm-docs && git add charts/*/README.md charts/*/values.schema.json"
+
+# The generated chart README/schema are .prettierignore'd; exclude them from the
+# shared formatters too (oxfmt exits non-zero when every input is ignored).
+[pre-commit.commands.format-markdown]
+exclude = ["charts/*/README.md"]
+
+[pre-commit.commands.format-json]
+exclude = ["charts/*/values.schema.json"]

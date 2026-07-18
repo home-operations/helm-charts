@@ -1,0 +1,297 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "affinity": {
+      "description": "Affinity rules for pod scheduling.",
+      "required": [],
+      "title": "affinity",
+      "type": "object"
+    },
+    "cni": {
+      "properties": {
+        "binDir": {
+          "default": "/opt/cni/bin",
+          "description": "Host directory with the CNI plugin binaries.",
+          "title": "binDir",
+          "type": "string"
+        },
+        "netDir": {
+          "default": "/etc/cni/net.d",
+          "description": "Host directory with the CNI network configurations.",
+          "title": "netDir",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "title": "cni",
+      "type": "object"
+    },
+    "cniPlugins": {
+      "properties": {
+        "enabled": {
+          "default": true,
+          "description": "Install the reference CNI plugins into `cni.binDir` via an init container.\nNeeded on distributions that do not ship them (e.g. Talos Linux); disable when\nthe host already provides them.",
+          "title": "enabled",
+          "type": "boolean"
+        },
+        "image": {
+          "properties": {
+            "pullPolicy": {
+              "default": "IfNotPresent",
+              "description": "Image pull policy.",
+              "title": "pullPolicy",
+              "type": "string"
+            },
+            "repository": {
+              "default": "ghcr.io/home-operations/cni-plugins",
+              "description": "CNI plugins image repository (copies the plugin binaries to the host).",
+              "title": "repository",
+              "type": "string"
+            },
+            "tag": {
+              "default": "1.9.1",
+              "description": "CNI plugins image tag.",
+              "title": "tag",
+              "type": "string"
+            }
+          },
+          "required": [],
+          "title": "image",
+          "type": "object"
+        },
+        "resources": {
+          "description": "Init container resource requests/limits.",
+          "required": [],
+          "title": "resources",
+          "type": "object"
+        }
+      },
+      "required": [],
+      "title": "cniPlugins",
+      "type": "object"
+    },
+    "extraArgs": {
+      "description": "Additional arguments passed to the multus entrypoint (the defaults\n`--cleanup-config-on-exit` and `--multus-cni-conf-dir=/tmp` are always set).",
+      "items": {
+        "required": []
+      },
+      "title": "extraArgs",
+      "type": "array"
+    },
+    "fullnameOverride": {
+      "default": "",
+      "description": "Override the full release name.",
+      "title": "fullnameOverride",
+      "type": "string"
+    },
+    "global": {
+      "description": "Global values are values that can be accessed from any chart or subchart by exactly the same name.",
+      "required": [],
+      "title": "global",
+      "type": "object"
+    },
+    "image": {
+      "description": "Default values for multus; the Multus CNI meta-plugin.\nThe NetworkAttachmentDefinition CRD ships unmodified from upstream in the\nchart's crds/ directory (see the README).",
+      "properties": {
+        "pullPolicy": {
+          "default": "IfNotPresent",
+          "description": "Image pull policy.",
+          "title": "pullPolicy",
+          "type": "string"
+        },
+        "repository": {
+          "default": "ghcr.io/k8snetworkplumbingwg/multus-cni",
+          "description": "Multus image repository.",
+          "title": "repository",
+          "type": "string"
+        },
+        "tag": {
+          "default": "",
+          "description": "Overrides the image tag; defaults to the chart appVersion.",
+          "title": "tag",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "title": "image",
+      "type": "object"
+    },
+    "imagePullSecrets": {
+      "description": "Image pull secrets for private registries.",
+      "items": {
+        "required": []
+      },
+      "title": "imagePullSecrets",
+      "type": "array"
+    },
+    "nameOverride": {
+      "default": "",
+      "description": "Override the chart name used in resource names.",
+      "title": "nameOverride",
+      "type": "string"
+    },
+    "nodeSelector": {
+      "description": "Node selector for pod scheduling.",
+      "required": [],
+      "title": "nodeSelector",
+      "type": "object"
+    },
+    "podAnnotations": {
+      "description": "Annotations added to the pod.",
+      "required": [],
+      "title": "podAnnotations",
+      "type": "object"
+    },
+    "podLabels": {
+      "description": "Labels added to the pod.",
+      "required": [],
+      "title": "podLabels",
+      "type": "object"
+    },
+    "podSecurityContext": {
+      "description": "Pod-level securityContext (the entrypoint writes to host paths and must run as root).",
+      "required": [],
+      "title": "podSecurityContext",
+      "type": "object"
+    },
+    "priorityClassName": {
+      "default": "system-node-critical",
+      "description": "Priority class name for pod scheduling (node infrastructure: must not be\nevicted from any node).",
+      "title": "priorityClassName",
+      "type": "string"
+    },
+    "rbac": {
+      "properties": {
+        "annotations": {
+          "description": "Annotations for the RBAC resources.",
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "create": {
+          "default": true,
+          "description": "Create the ClusterRole/ClusterRoleBinding the CNI plugin needs to read pod\nnetwork annotations and report status.",
+          "title": "create",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "title": "rbac",
+      "type": "object"
+    },
+    "resources": {
+      "description": "Pod resource requests/limits.",
+      "required": [],
+      "title": "resources",
+      "type": "object"
+    },
+    "securityContext": {
+      "description": "Container securityContext (no privilege escalation, read-only root filesystem, NET_ADMIN only).",
+      "properties": {
+        "allowPrivilegeEscalation": {
+          "default": false,
+          "title": "allowPrivilegeEscalation",
+          "type": "boolean"
+        },
+        "capabilities": {
+          "properties": {
+            "add": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "title": "add",
+              "type": "array"
+            },
+            "drop": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  }
+                ],
+                "required": []
+              },
+              "title": "drop",
+              "type": "array"
+            }
+          },
+          "required": [],
+          "title": "capabilities",
+          "type": "object"
+        },
+        "readOnlyRootFilesystem": {
+          "default": true,
+          "title": "readOnlyRootFilesystem",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "title": "securityContext",
+      "type": "object"
+    },
+    "serviceAccount": {
+      "properties": {
+        "annotations": {
+          "description": "Annotations for the ServiceAccount.",
+          "required": [],
+          "title": "annotations",
+          "type": "object"
+        },
+        "automount": {
+          "default": true,
+          "description": "Automount the API token (on by default: the entrypoint generates a\nkubeconfig from it for the CNI plugin).",
+          "title": "automount",
+          "type": "boolean"
+        },
+        "create": {
+          "default": true,
+          "description": "Create a ServiceAccount.",
+          "title": "create",
+          "type": "boolean"
+        },
+        "name": {
+          "default": "",
+          "description": "ServiceAccount name; generated from the release name if empty.",
+          "title": "name",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "title": "serviceAccount",
+      "type": "object"
+    },
+    "tolerations": {
+      "description": "Tolerations for pod scheduling (defaults keep the DaemonSet on\ncritical-addons-only nodes).",
+      "items": {
+        "anyOf": [
+          {
+            "properties": {
+              "key": {
+                "default": "CriticalAddonsOnly",
+                "title": "key",
+                "type": "string"
+              },
+              "operator": {
+                "default": "Exists",
+                "title": "operator",
+                "type": "string"
+              }
+            },
+            "required": [],
+            "type": "object"
+          }
+        ],
+        "required": []
+      },
+      "title": "tolerations",
+      "type": "array"
+    }
+  },
+  "required": [],
+  "type": "object"
+}

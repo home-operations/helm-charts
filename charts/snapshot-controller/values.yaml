@@ -1,0 +1,181 @@
+---
+# Default values for snapshot-controller; the CSI external-snapshotter controller.
+# The snapshot CRDs ship unmodified from upstream in the chart's crds/ directory
+# (no conversion webhook; see piraeusdatastore/helm-charts#98 and the README).
+
+# -- Number of controller replicas; leader election picks the active instance.
+replicaCount: 1
+
+image:
+  # -- Image repository.
+  repository: registry.k8s.io/sig-storage/snapshot-controller
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag; defaults to the chart appVersion.
+  tag: ""
+
+# -- Image pull secrets for private registries.
+imagePullSecrets: []
+# - name: my-registry-secret
+
+# -- Override the chart name used in resource names.
+nameOverride: ""
+# -- Override the full release name.
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Create a ServiceAccount.
+  create: true
+  # -- Automount the API token (on by default: the controller talks to the cluster API).
+  automount: true
+  # -- Annotations for the ServiceAccount (e.g. workload-identity bindings).
+  annotations: {}
+  # -- ServiceAccount name; generated from the release name if empty.
+  name: ""
+
+rbac:
+  # -- Create the ClusterRole/ClusterRoleBinding and leader-election Role/RoleBinding
+  # (rules mirror the upstream rbac-snapshot-controller.yaml).
+  create: true
+  # -- Annotations for the RBAC resources.
+  annotations: {}
+
+# -- Annotations added to the pod.
+podAnnotations: {}
+# -- Labels added to the pod.
+podLabels: {}
+
+# -- Pod-level securityContext (runs as non-root uid/gid 65532).
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  # Required by the PodSecurity "restricted" profile (org chart standard).
+  seccompProfile:
+    type: RuntimeDefault
+
+# -- Container securityContext (no privilege escalation, read-only root filesystem, drops ALL capabilities).
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 65532
+
+# Controller runtime configuration.
+controller:
+  # -- Log verbosity (klog --v level).
+  verbosity: 2
+
+  leaderElection:
+    # -- Enable leader election (required to run more than one replica). The default
+    # probes hit /healthz/leader-election, which only exists while leader election
+    # is on; override livenessProbe/readinessProbe when disabling this.
+    enabled: true
+
+  # -- Enable the CSIVolumeGroupSnapshot feature gate (VolumeGroupSnapshot support).
+  volumeGroupSnapshots: true
+
+  metrics:
+    # -- Operational port: /metrics plus the leader-election health check (plain
+    # HTTP; always on; restrict with a NetworkPolicy rather than disabling).
+    port: 8080
+    # -- Annotations for the metrics Service.
+    annotations: {}
+
+  # -- Additional arguments passed to the controller (e.g. "--retry-crd-interval-max=30s").
+  extraArgs: []
+
+# -- Extra environment variables passed to the container.
+env: []
+# - name: FOO
+#   value: bar
+
+# -- Liveness probe.
+livenessProbe:
+  httpGet:
+    path: /healthz/leader-election
+    port: metrics
+  initialDelaySeconds: 10
+  periodSeconds: 20
+
+# -- Readiness probe.
+readinessProbe:
+  httpGet:
+    path: /healthz/leader-election
+    port: metrics
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+# -- Pod resource requests/limits.
+resources: {}
+# limits:
+#   cpu: 100m
+#   memory: 128Mi
+# requests:
+#   cpu: 10m
+#   memory: 32Mi
+
+# -- Priority class name for pod scheduling (cluster infrastructure: keep it
+# schedulable ahead of ordinary workloads).
+priorityClassName: system-cluster-critical
+
+# -- Node selector for pod scheduling.
+nodeSelector: {}
+
+# -- Tolerations for pod scheduling.
+tolerations: []
+
+# -- Affinity rules for pod scheduling.
+affinity: {}
+
+# -- Topology spread constraints for the pods.
+topologySpreadConstraints: []
+
+# -- PodDisruptionBudget spec (e.g. `maxUnavailable: 1`); rendered when non-empty.
+podDisruptionBudget: {}
+
+monitoring:
+  serviceMonitor:
+    # -- Create a Prometheus Operator ServiceMonitor (requires its CRDs).
+    enabled: false
+    # -- Scrape interval.
+    interval: 30s
+    # -- Scrape timeout.
+    scrapeTimeout: 10s
+    # -- Metrics path.
+    path: /metrics
+    # -- ServiceMonitor labels.
+    labels: {}
+    # -- ServiceMonitor annotations.
+    annotations: {}
+    # -- Prometheus metric relabelings.
+    metricRelabelings: []
+    # -- Prometheus relabelings (applied before scraping).
+    relabelings: []
+    # -- Target labels to copy from the Service.
+    targetLabels: []
+    # -- Pod target labels to copy from pods.
+    podTargetLabels: []
+
+# -- VolumeSnapshotClasses to create (each entry: name, driver, deletionPolicy, and
+# optional annotations, labels, parameters).
+volumeSnapshotClasses: []
+# - name: csi-snapclass
+#   annotations:
+#     snapshot.storage.kubernetes.io/is-default-class: "true"
+#   labels:
+#     velero.io/csi-volumesnapshot-class: "true"
+#   driver: csi.example.com
+#   deletionPolicy: Delete
+#   parameters: {}
+
+# -- VolumeGroupSnapshotClasses to create (same shape as volumeSnapshotClasses;
+# requires controller.volumeGroupSnapshots).
+volumeGroupSnapshotClasses: []
+# - name: csi-groupsnapclass
+#   driver: csi.example.com
+#   deletionPolicy: Delete

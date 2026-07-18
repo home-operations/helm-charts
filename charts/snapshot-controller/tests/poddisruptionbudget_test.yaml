@@ -1,0 +1,21 @@
+suite: poddisruptionbudget
+templates:
+  - poddisruptionbudget.tpl
+tests:
+  - it: should not render by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: should render the provided spec
+    set:
+      podDisruptionBudget:
+        maxUnavailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - exists:
+          path: spec.selector.matchLabels

@@ -1,0 +1,34 @@
+suite: service
+templates:
+  - service.tpl
+tests:
+  - it: should create a ClusterIP metrics Service
+    asserts:
+      - isKind:
+          of: Service
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: spec.ports[0].name
+          value: metrics
+      - equal:
+          path: spec.ports[0].port
+          value: 8080
+
+  - it: should follow the metrics port
+    set:
+      controller.metrics.port: 9090
+    asserts:
+      - equal:
+          path: spec.ports[0].port
+          value: 9090
+
+  - it: should add metrics service annotations
+    set:
+      controller.metrics.annotations:
+        foo: bar
+    asserts:
+      - equal:
+          path: metadata.annotations.foo
+          value: bar
