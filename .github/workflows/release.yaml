@@ -34,15 +34,30 @@ jobs:
           experimental: true
           install_args: --locked
 
-      # release-please tags: <chart>-<version>, no v prefix.
+      # release-please tags: <chart>-<version>, no v prefix. Match the tag
+      # against the chart directories (longest name wins) so hyphenated chart
+      # names and prerelease versions both parse.
       - name: Parse chart and version from the release tag
         id: parse
         run: |
-          echo "chart=${TAG%-*}" >> "$GITHUB_OUTPUT"
-          echo "version=${TAG##*-}" >> "$GITHUB_OUTPUT"
+          chart=""
+          for dir in charts/*/; do
+            name="$(basename "${dir}")"
+            if [[ "${TAG}" == "${name}"-* && "${#name}" -gt "${#chart}" ]]; then
+              chart="${name}"
+            fi
+          done
+          if [[ -z "${chart}" ]]; then
+            echo "::error::release tag '${TAG}' does not match any chart in charts/"
+            exit 1
+          fi
+          echo "chart=${chart}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#"${chart}"-}" >> "$GITHUB_OUTPUT"
 
+      # crds-check fails if the fresh vendor no longer matches the committed
+      # vendir.lock.yml, so a moved upstream ref cannot ship CRDs CI never saw.
       - name: Vendor upstream CRDs
-        run: mise run crds
+        run: mise run crds-check
 
       - name: Package Helm chart
         env:
@@ -58,13 +73,24 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish Helm chart to GHCR
+        id: push
         env:
           CHART: ${{ steps.parse.outputs.chart }}
           VERSION: ${{ steps.parse.outputs.version }}
-        run: helm push "${CHART}-${VERSION}.tgz" "oci://ghcr.io/${{ github.repository_owner }}/charts"
+        run: |
+          set -o pipefail
+          helm push "${CHART}-${VERSION}.tgz" "oci://ghcr.io/${{ github.repository_owner }}/charts" 2>&1 | tee push.log
+          digest="$(awk '/^Digest:/ {print $2}' push.log)"
+          if [[ -z "${digest}" ]]; then
+            echo "::error::could not parse the chart digest from the helm push output"
+            exit 1
+          fi
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
 
+      # Sign the digest, not the tag, so the signature covers exactly what was
+      # pushed; cosign verify by tag still works.
       - name: Sign the published chart with Cosign
         env:
           CHART: ${{ steps.parse.outputs.chart }}
-          VERSION: ${{ steps.parse.outputs.version }}
-        run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/charts/${CHART}:${VERSION}"
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/charts/${CHART}@${DIGEST}"
