@@ -7,22 +7,13 @@
     "customManagers:helmChartYamlAppVersions",
   ],
   packageRules: [
-    // Each chart's appVersion (docker tag) and its vendir git ref track the same
-    // upstream; group them so they bump in one PR (the crds task enforces they
-    // match).
+    // One grouped PR per chart: every dependency found under a chart directory
+    // (the appVersion annotation, its vendir git ref, values.yaml images) lands
+    // on one branch. Grouping appVersion with the vendir ref also keeps the
+    // crds task's ref==appVersion check green on Renovate PRs.
     {
-      groupName: "external-snapshotter",
-      matchPackageNames: [
-        "registry.k8s.io/sig-storage/snapshot-controller",
-        "https://github.com/kubernetes-csi/external-snapshotter",
-      ],
-    },
-    {
-      groupName: "multus-cni",
-      matchPackageNames: [
-        "ghcr.io/k8snetworkplumbingwg/multus-cni",
-        "https://github.com/k8snetworkplumbingwg/multus-cni",
-      ],
+      matchFileNames: ["charts/**"],
+      groupName: "{{parentDir}} chart",
     },
   ],
 }
