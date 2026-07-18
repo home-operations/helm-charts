@@ -1,7 +1,5 @@
 # snapshot-controller
 
-![Version: 0.0.0](https://img.shields.io/badge/Version-0.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v8.6.0](https://img.shields.io/badge/AppVersion-v8.6.0-informational?style=flat-square)
-
 Deploys the CSI external-snapshotter snapshot-controller together with the volume snapshot CRDs, shipped exactly as upstream publishes them. Snapshot controllers are often bundled with the Kubernetes distribution; this chart is for clusters where they are not.
 
 **Homepage:** <https://github.com/home-operations/helm-charts>

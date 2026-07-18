@@ -1,7 +1,5 @@
 # multus
 
-![Version: 0.0.0](https://img.shields.io/badge/Version-0.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.3.0](https://img.shields.io/badge/AppVersion-v4.3.0-informational?style=flat-square)
-
 Deploys the Multus CNI meta-plugin together with the NetworkAttachmentDefinition CRD, allowing pods to attach to additional networks. Includes an optional init container that installs the reference CNI plugins on distributions that do not ship them (e.g. Talos Linux).
 
 **Homepage:** <https://github.com/home-operations/helm-charts>

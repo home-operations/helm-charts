@@ -47,7 +47,7 @@ jobs:
           CHANGED: ${{ steps.changed.outputs.changed_files }}
         run: |
           if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
-            charts="$(printf '%s\n' charts/* | jq --raw-input . | jq --compact-output --slurp .)"
+            charts="$(for dir in charts/*/; do basename "${dir}"; done | jq --raw-input . | jq --compact-output --slurp .)"
           else
             charts="${CHANGED}"
           fi
@@ -78,5 +78,5 @@ jobs:
 
       - name: Run helm lint
         env:
-          CHARTS: ${{ matrix.chart }}
+          CHARTS: charts/${{ matrix.chart }}
         run: mise run helm-lint

@@ -51,7 +51,7 @@ jobs:
           CHANGED: ${{ steps.changed.outputs.changed_files }}
         run: |
           if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
-            charts="$(printf '%s\n' charts/* | jq --raw-input . | jq --compact-output --slurp .)"
+            charts="$(for dir in charts/*/; do basename "${dir}"; done | jq --raw-input . | jq --compact-output --slurp .)"
           else
             charts="${CHANGED}"
           fi
@@ -82,7 +82,7 @@ jobs:
 
       - name: Run helm unit tests
         env:
-          CHARTS: ${{ matrix.chart }}
+          CHARTS: charts/${{ matrix.chart }}
         run: |
           helm plugin install https://github.com/helm-unittest/helm-unittest --version "${HELM_UNITTEST_VERSION}" --verify=false
           mise run helm-test
