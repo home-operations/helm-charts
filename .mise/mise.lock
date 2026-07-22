@@ -285,7 +285,7 @@ url = "https://github.com/evilmartians/lefthook/releases/download/v2.1.10/leftho
 provenance = "github-attestations"
 
 [[tools.oxfmt]]
-version = "0.59.0"
+version = "0.60.0"
 backend = "npm:oxfmt"
 
 [[tools.vendir]]
