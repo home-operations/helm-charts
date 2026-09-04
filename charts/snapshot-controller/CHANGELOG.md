@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/home-operations/helm-charts/compare/snapshot-controller-0.1.0...snapshot-controller-0.1.1) (2026-09-04)
+
+
+### Miscellaneous Chores
+
+* **deps:** lock file maintenance (vendir) ([#26](https://github.com/home-operations/helm-charts/issues/26)) ([843dcf0](https://github.com/home-operations/helm-charts/commit/843dcf013d37ceec87b29bbfab9df1bdb8a8114f))
+
 ## 0.1.0 (2026-07-18)
 
 
