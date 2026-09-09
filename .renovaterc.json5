@@ -9,11 +9,19 @@
   packageRules: [
     // One grouped PR per chart: every dependency found under a chart directory
     // (the appVersion annotation, its vendir git ref, values.yaml images) lands
-    // on one branch. Grouping appVersion with the vendir ref also keeps the
-    // crds task's ref==appVersion check green on Renovate PRs.
+    // on one branch.
     {
       matchFileNames: ["charts/**"],
       groupName: "{{parentDir}} chart",
+    },
+    // The vendir git ref and the appVersion image tag track the same upstream
+    // release from different datasources (git tags vs. the container registry),
+    // and the image can lag the tag. Hold the branch until both resolve so the
+    // crds task's ref==appVersion check stays green on Renovate PRs.
+    {
+      matchFileNames: ["charts/**/vendir.yml", "charts/**/Chart.yaml"],
+      groupName: "{{parentDir}} upstream",
+      minimumGroupSize: 2,
     },
   ],
 }
