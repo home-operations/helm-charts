@@ -23,5 +23,12 @@
       groupName: "{{parentDir}} upstream",
       minimumGroupSize: 2,
     },
+    // Vendir refs are pinned git tags, so the lock sha never moves; the
+    // monthly lock maintenance branch would only sit on the dashboard held by
+    // the minimumGroupSize rule above.
+    {
+      matchManagers: ["vendir"],
+      lockFileMaintenance: { enabled: false },
+    },
   ],
 }
