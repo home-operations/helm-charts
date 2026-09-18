@@ -32,7 +32,7 @@ jobs:
       ${{ !(startsWith(github.head_ref, 'release-please--')
       && github.event.pull_request.head.repo.full_name == github.repository) }}
     name: Changed
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     outputs:
@@ -45,7 +45,7 @@ jobs:
 
       - name: Get changed charts
         id: changed
-        uses: bjw-s-labs/action-changed-files@a9a36fb08ce06db9b02fbd8026cc2c0945eb9841 # v0.6.0
+        uses: bjw-s-labs/action-changed-files@147be9638332cf68fd60714a610509d7a9360d60 # v0.7.0
         with:
           path: charts
           include_only_directories: true
@@ -68,7 +68,7 @@ jobs:
     name: Helm E2E (${{ matrix.chart }})
     needs: changed
     if: ${{ github.event_name != 'push' && needs.changed.outputs.charts != '[]' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     strategy:
@@ -96,7 +96,7 @@ jobs:
     name: Helm Lint (${{ matrix.chart }})
     needs: changed
     if: ${{ needs.changed.outputs.charts != '[]' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     strategy:
@@ -124,7 +124,7 @@ jobs:
     name: Helm Unittest (${{ matrix.chart }})
     needs: changed
     if: ${{ needs.changed.outputs.charts != '[]' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     strategy:
@@ -156,7 +156,7 @@ jobs:
       ${{ !(startsWith(github.head_ref, 'release-please--')
       && github.event.pull_request.head.repo.full_name == github.repository) }}
     name: Repo Checks
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -182,7 +182,7 @@ jobs:
       ${{ !(startsWith(github.head_ref, 'release-please--')
       && github.event.pull_request.head.repo.full_name == github.repository) }}
     name: Workflow Lint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       contents: read
     steps:
@@ -218,7 +218,7 @@ jobs:
       - helm-unittest
       - repo-checks
       - workflow-lint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions: {}
     steps:
       # cancelled counts as failed: !cancelled() above still runs this job when
