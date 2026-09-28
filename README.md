@@ -58,7 +58,7 @@ everything (including the git hooks via lefthook). Unit tests additionally need 
 
 Pull-request workflows lint, unit-test, and e2e-test only the charts whose files
 changed (via
-[action-changed-files](https://github.com/bjw-s-labs/action-changed-files)); the
+[tj-actions/changed-files](https://github.com/tj-actions/changed-files)); the
 repo-wide gates (generated docs, vendir lock) always run. Releases are inherently
 per chart through release-please tags.
 
