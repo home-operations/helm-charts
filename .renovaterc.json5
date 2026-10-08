@@ -30,5 +30,12 @@
       matchManagers: ["vendir"],
       lockFileMaintenance: { enabled: false },
     },
+    // Exempt chart updates from the org prHourlyLimit and create them last,
+    // since they still add to the hourly PR count.
+    {
+      matchFileNames: ["charts/**"],
+      prHourlyLimit: 0,
+      prPriority: -1,
+    },
   ],
 }
