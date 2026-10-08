@@ -11,7 +11,7 @@ directories:
       - path: .
         git:
           url: https://github.com/k8snetworkplumbingwg/multus-cni
-          ref: v4.3.0
+          ref: v4.3.1
         includePaths:
           - deployments/multus-daemonset.yml
         newRootPath: deployments
