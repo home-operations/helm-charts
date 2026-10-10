@@ -2,10 +2,10 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - git:
-      commitTitle: 'Merge pull request #1510 from hrntknr/limit_listener...'
-      sha: db30741512795c258b3ba383a571a66850e8baac
+      commitTitle: 'Merge pull request #1539 from cathy-zhou/sortDeviceIDPerContainer...'
+      sha: d61706810cc8be60381dcb66e6a2428d5eb2795a
       tags:
-      - v4.3.0
+      - v4.3.1
     path: .
   path: .vendor/multus-cni
 kind: LockConfig
