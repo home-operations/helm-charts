@@ -9,7 +9,7 @@ description: >-
 type: application
 kubeVersion: ">=1.25.0-0"
 # Managed by release-please.
-version: 0.1.0
+version: 0.1.1
 # Upstream release: default image tag; must match the vendir ref (`mise run crds`).
 # renovate: image=ghcr.io/k8snetworkplumbingwg/multus-cni
 appVersion: "v4.3.1"
