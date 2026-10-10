@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/home-operations/helm-charts/compare/multus-0.1.0...multus-0.1.1) (2026-10-10)
+
+
+### Features
+
+* **multus:** support DRA allocations via multus-cni v4.3.1 ([#72](https://github.com/home-operations/helm-charts/issues/72)) ([a80ef50](https://github.com/home-operations/helm-charts/commit/a80ef50090c9caadb3486acf2ca1c679613f69c8))
+
 ## 0.1.0 (2026-07-18)
 
 
