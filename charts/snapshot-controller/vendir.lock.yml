@@ -2,10 +2,10 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - git:
-      commitTitle: 'Merge pull request #1428 from xing-yang/changelog-8.6.0...'
-      sha: 78e32cd84e0abec2621924a30e38c755f93e180a
+      commitTitle: 'Merge pull request #1510 from xing-yang/changelog_8.7.0_on_8.7...'
+      sha: 9cc6050ab00a0c56d84ba0279e518a00367363e7
       tags:
-      - v8.6.0
+      - client/v8.7.0
     path: .
   path: crds
 kind: LockConfig
