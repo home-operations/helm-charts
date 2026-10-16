@@ -6,6 +6,9 @@
     // `# renovate: image=...` annotation above it.
     "customManagers:helmChartYamlAppVersions",
   ],
+  // Chart releases ship from Renovate PRs, so skip the org preset's update
+  // window.
+  schedule: ["at any time"],
   packageRules: [
     // One grouped PR per chart: every dependency found under a chart directory
     // (the appVersion annotation, its vendir git ref, values.yaml images) lands
