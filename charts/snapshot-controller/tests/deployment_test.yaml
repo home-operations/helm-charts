@@ -3,12 +3,14 @@ templates:
   - deployment.tpl
 tests:
   - it: should render a Deployment with the appVersion image by default
+    chart:
+      appVersion: v0.0.0
     asserts:
       - isKind:
           of: Deployment
       - equal:
           path: spec.template.spec.containers[0].image
-          value: registry.k8s.io/sig-storage/snapshot-controller:v8.6.0
+          value: registry.k8s.io/sig-storage/snapshot-controller:v0.0.0
       - equal:
           path: spec.replicas
           value: 1

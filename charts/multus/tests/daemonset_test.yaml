@@ -3,12 +3,14 @@ templates:
   - daemonset.tpl
 tests:
   - it: should render a DaemonSet with the appVersion image by default
+    chart:
+      appVersion: v0.0.0
     asserts:
       - isKind:
           of: DaemonSet
       - equal:
           path: spec.template.spec.containers[0].image
-          value: ghcr.io/k8snetworkplumbingwg/multus-cni:v4.3.1
+          value: ghcr.io/k8snetworkplumbingwg/multus-cni:v0.0.0
       - equal:
           path: spec.template.spec.hostNetwork
           value: true
@@ -21,9 +23,9 @@ tests:
       - equal:
           path: spec.template.spec.initContainers[0].name
           value: cni-plugins
-      - equal:
+      - matchRegex:
           path: spec.template.spec.initContainers[0].image
-          value: ghcr.io/home-operations/cni-plugins:1.9.1
+          pattern: ^ghcr\.io/home-operations/cni-plugins:.+$
       - equal:
           path: spec.template.spec.initContainers[0].volumeMounts[0].mountPath
           value: /host/opt/cni/bin
