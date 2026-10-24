@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/home-operations/helm-charts/compare/multus-0.1.1...multus-0.1.2) (2026-10-24)
+
+
+### Tests
+
+* stop asserting release versions in image tests ([08bb957](https://github.com/home-operations/helm-charts/commit/08bb957b794f7a843e3de306dc44ce3af829263b))
+
 ## [0.1.1](https://github.com/home-operations/helm-charts/compare/multus-0.1.0...multus-0.1.1) (2026-10-10)
 
 
