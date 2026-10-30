@@ -1,7 +1,7 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
-    "local>home-operations/renovate-config",
+    "local>home-operations/.github:renovate-config",
     // Bumps Chart.yaml appVersion from the upstream image tag via the
     // `# renovate: image=...` annotation above it.
     "customManagers:helmChartYamlAppVersions",
