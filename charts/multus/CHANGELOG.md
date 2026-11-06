@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.2](https://github.com/home-operations/helm-charts/compare/multus-0.1.1...multus-0.1.2) (2026-11-06)
+
+
+### Tests
+
+* stop asserting release versions in image tests ([08bb957](https://github.com/home-operations/helm-charts/commit/08bb957b794f7a843e3de306dc44ce3af829263b))
+
+
+### Miscellaneous Chores
+
+* **container:** update multus upstream (v4.3.1 → v4.3.2) ([#107](https://github.com/home-operations/helm-charts/issues/107)) ([7350715](https://github.com/home-operations/helm-charts/commit/735071532e38035e5afe5e562bb7aaf94e591aee))
+
 ## [0.1.1](https://github.com/home-operations/helm-charts/compare/multus-0.1.0...multus-0.1.1) (2026-10-10)
 
 
