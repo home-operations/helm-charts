@@ -57,7 +57,7 @@ Kubernetes: `>=1.25.0-0`
 | cniPlugins.enabled | bool | `true` | Install the reference CNI plugins into `cni.binDir` via an init container. Needed on distributions that do not ship them (e.g. Talos Linux); disable when the host already provides them. |
 | cniPlugins.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy. |
 | cniPlugins.image.repository | string | `"ghcr.io/home-operations/cni-plugins"` | CNI plugins image repository (copies the plugin binaries to the host). |
-| cniPlugins.image.tag | string | `"1.9.1"` | CNI plugins image tag. |
+| cniPlugins.image.tag | string | `"1.10.0"` | CNI plugins image tag. |
 | cniPlugins.resources | object | `{}` | Init container resource requests/limits. |
 | extraArgs | list | `[]` | Additional arguments passed to the multus entrypoint (the defaults `--cleanup-config-on-exit` and `--multus-cni-conf-dir=/tmp` are always set). |
 | fullnameOverride | string | `""` | Override the full release name. |
