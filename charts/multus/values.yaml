@@ -22,7 +22,7 @@ cniPlugins:
     # -- Image pull policy.
     pullPolicy: IfNotPresent
     # -- CNI plugins image tag.
-    tag: 1.9.1
+    tag: 1.10.0
   # -- Init container resource requests/limits.
   resources: {}
 
