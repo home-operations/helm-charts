@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.2](https://github.com/home-operations/helm-charts/compare/multus-0.1.1...multus-0.1.2) (2026-11-12)
+
+
+### Tests
+
+* stop asserting release versions in image tests ([08bb957](https://github.com/home-operations/helm-charts/commit/08bb957b794f7a843e3de306dc44ce3af829263b))
+
+
+### Miscellaneous Chores
+
+* **container:** update image ghcr.io/home-operations/cni-plugins (1.9.1 → 1.10.0) ([#111](https://github.com/home-operations/helm-charts/issues/111)) ([861ade7](https://github.com/home-operations/helm-charts/commit/861ade7d4948d4f0da9898b4c76bbbcff392856b))
+* **container:** update multus upstream (v4.3.1 → v4.3.2) ([#107](https://github.com/home-operations/helm-charts/issues/107)) ([7350715](https://github.com/home-operations/helm-charts/commit/735071532e38035e5afe5e562bb7aaf94e591aee))
+
 ## [0.1.1](https://github.com/home-operations/helm-charts/compare/multus-0.1.0...multus-0.1.1) (2026-10-10)
 
 
