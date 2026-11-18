@@ -8,7 +8,7 @@ jq = "1.8.2"
 kind = "0.33.0"
 kubectl = "1.37.2"
 lefthook = "2.2.2"
-"github:oxc-project/oxc" = { version = "0.75.0", version_prefix = "oxfmt_v", matching_regex = "^oxfmt-", rename_exe = "oxfmt" }
+"github:oxc-project/oxc" = { version = "0.78.0", version_prefix = "oxfmt_v", matching_regex = "^oxfmt-", rename_exe = "oxfmt" }
 vendir = "0.46.3"
 yq = "4.54.3"
 zizmor = "1.32.0"
