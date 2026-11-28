@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/home-operations/helm-charts/compare/snapshot-controller-0.1.2...snapshot-controller-0.1.3) (2026-11-28)
+
+
+### Miscellaneous Chores
+
+* **deps:** update snapshot-controller upstream (v8.7.0 → v8.7.1) ([#120](https://github.com/home-operations/helm-charts/issues/120)) ([e225710](https://github.com/home-operations/helm-charts/commit/e225710d720eec1e758d8c55f9da1a2f2061f072))
+
 ## [0.1.2](https://github.com/home-operations/helm-charts/compare/snapshot-controller-0.1.1...snapshot-controller-0.1.2) (2026-10-16)
 
 
